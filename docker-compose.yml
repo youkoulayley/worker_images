@@ -1,0 +1,7 @@
+version: '3'
+services:
+  nats-streaming:
+    image: nats-streaming
+    ports:
+     - "4222:4222"
+    command: ["-cid", "serieall"]
