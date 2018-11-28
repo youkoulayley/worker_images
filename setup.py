@@ -5,7 +5,6 @@ setup(
     packages=['worker_images'],
     include_package_data=True,
     install_requires=[
-        'flask',
-        'nats'
+        'asyncio-nats-streaming',
     ],
 )
