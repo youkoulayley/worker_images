@@ -29,8 +29,8 @@ async def run(loop):
 
     # Synchronous Publisher, does not return until an ack
     # has been received from NATS Streaming.
-    await sc.publish("foo", b'hello')
-    await sc.publish("foo", b'world')
+    await sc.publish("worker_images", b'hello')
+    await sc.publish("worker_images", b'world')
 
     # Close NATS Streaming session
     await sc.close()
