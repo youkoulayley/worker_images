@@ -7,9 +7,7 @@ logger = logging.getLogger(application_name)
 
 
 def run(message):
-    logger.info("Start working")
     decode_message(message)
-    logger.info("End working")
 
 
 def decode_message(message):
@@ -22,5 +20,7 @@ def decode_message(message):
             # 'crop': str(message['crop'])
         }
 
-    except (ValueError, KeyError):
-        logger.error(message + " is not a valid JSON message.")
+    except KeyError as e:
+        logger.error("%s is not a valid JSON message. Missing: %s key.", message, e)
+    except ValueError as e:
+        logger.error('toto')
