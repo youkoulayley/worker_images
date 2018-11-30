@@ -13,6 +13,7 @@
 #
 
 import asyncio
+import json
 from nats.aio.client import Client as NATS
 from stan.aio.client import Client as STAN
 
@@ -29,8 +30,8 @@ async def run(loop):
 
     # Synchronous Publisher, does not return until an ack
     # has been received from NATS Streaming.
-    await sc.publish("worker_images", b'hello')
-    await sc.publish("worker_images", b'world')
+    message = json.dumps({"url": "https://serieall.fr"}).encode()
+    await sc.publish("worker_images", message)
 
     # Close NATS Streaming session
     await sc.close()
