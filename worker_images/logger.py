@@ -6,6 +6,10 @@ log_level = config.get_config("LOGGING", "level")
 
 
 def init_logging():
+    """
+    Init the logger for the app
+    """
+
     handler_console = logging.StreamHandler()
     formatter = logging.Formatter('[%(asctime)s] %(levelname)s : %(message)s')
     handler_console.setFormatter(formatter)
@@ -20,4 +24,3 @@ def init_logging():
         logger.setLevel(logging.ERROR)
     elif log_level == "debug":
         logger.setLevel(logging.DEBUG)
-

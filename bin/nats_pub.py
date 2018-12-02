@@ -1,17 +1,3 @@
-# Copyright 2016-2018 The NATS Authors
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
 import asyncio
 import json
 from nats.aio.client import Client as NATS
@@ -19,24 +5,20 @@ from stan.aio.client import Client as STAN
 
 
 async def run(loop):
-    # Use borrowed connection for NATS then mount NATS Streaming
-    # client on top.
     nc = NATS()
     await nc.connect(io_loop=loop)
 
-    # Start session with NATS Streaming cluster.
     sc = STAN()
     await sc.connect("serieall", "worker-images-sub", nats=nc)
 
-    # Synchronous Publisher, does not return until an ack
-    # has been received from NATS Streaming.
-    message = json.dumps({"url": "https://serieall.fr"}).encode()
+    message = json.dumps({"url": "https://www.thetvdb.com/banners/fanart/original/5b0fcf2c5c1b5.jpg",
+                          "name": "supergirl", "crop_type": "poster", "crop": "middle"}).encode()
+    message2 = json.dumps({"url": "https://www.thetvdb.com/banners/graphical/295759-g2.jpg",
+                          "name": "supergirl_banner", "crop_type": "banner", "crop": "middle"}).encode()
     await sc.publish("worker_images", message)
+    await sc.publish("worker_images", message2)
 
-    # Close NATS Streaming session
     await sc.close()
-
-    # We are using a NATS borrowed connection so we need to close manually.
     await nc.close()
 
 if __name__ == '__main__':

@@ -13,6 +13,12 @@ client_id = str(os.getpid())
 
 
 async def run(loop):
+    """
+    Async function for watching messages in NATS.
+
+    :param loop:
+    """
+
     nc = NATS()
     sc = STAN()
 
@@ -24,7 +30,7 @@ async def run(loop):
 
     # Async subscriber
     async def cb(msg):
-        logger.debug("Received a message (seq={}): {}".format(msg.seq, json.loads(msg.data)))
+        logger.info("Received a message (seq={}): {}".format(msg.seq, json.loads(msg.data)))
         worker.run(json.loads(msg.data))
 
     # Subscribe to get all messages from the beginning.
