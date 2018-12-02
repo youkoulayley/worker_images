@@ -5,6 +5,7 @@ of being adapted to any other usages.
 The worker images takes message from NATS, download the desired image, resize it and crop if necessary.
 
 **Workflow of the worker** :
+
 ![Worflow](worflow/workflow.jpg)
 
 ## NATS
