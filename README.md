@@ -17,7 +17,8 @@ The message send to the worker image need to have this format :
   "url": "https://www.thetvdb.com/banners/fanart/original/5b0fcf2c5c1b5.jpg", 
   "name": "supergirl", 
   "crop_type": "poster", 
-  "crop": "middle"
+  "crop": "middle",
+  "force_crop": "false"
 }
 ```
 
@@ -26,7 +27,8 @@ The message contains different section :
 * **URL**: The URL where to download the image ;
 * **Name**: The name of the image when saved to the disk ;
 * **Crop_type**: The type to use (show config.ini for more informations) ;
-* **Crop**: The alignment of the crop.
+* **Crop**: The alignment of the crop ;
+* **Force_crop**: If true, force the resize & crop, even if the fil exists.
 
 ## config.ini
 Example : 
