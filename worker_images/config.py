@@ -1,4 +1,5 @@
 import configparser
+import os
 
 
 def get_config(section, key):
@@ -11,7 +12,7 @@ def get_config(section, key):
     """
 
     config = configparser.ConfigParser()
-    config.read('../config.ini')
+    config.read(os.path.dirname(os.path.abspath(__file__)) + '/../config.ini')
 
     value = config.get(section, key)
 
