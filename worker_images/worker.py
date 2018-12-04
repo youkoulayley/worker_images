@@ -23,7 +23,7 @@ def run(message):
     :param message:
     """
     image = decode_message(message)
-    image_exists = check_image_exist(image)
+    image_exists = check_file_exist(original_folder + "/" + image["name"] + "." + image["extension"])
 
     if not image_exists:
         logger.debug("The image %s does not exist on disk. Downloading it...", image['name'])
@@ -45,7 +45,15 @@ def run(message):
             logger.error("The URL %s is not valid", image['url'])
 
     for image_format in json.loads(image_formats)[image['crop_type']]:
-        resize_and_crop(image, image_format)
+        if image['force_crop']:
+            resize_and_crop(image, image_format)
+        else:
+            check_crop_exists = check_file_exist(images_folder + '/' + image_format + "/" + image['name'] + "." +
+                                                 image['extension'])
+            if not check_crop_exists:
+                resize_and_crop(image, image_format)
+            else:
+                logger.debug("The image %s was not resized and crop (%s).", image['name'], image_format)
 
 
 def decode_message(message) -> dict:
@@ -64,14 +72,17 @@ def decode_message(message) -> dict:
             'name': str(message['name']),
             'extension': str(message['url']).rsplit('.', 1)[1],
             'crop_type': str(message['crop_type']),
-            'crop': str(message['crop'])
+            'crop': str(message['crop']),
+            "force_crop": bool(message['force_crop'])
         }
         return image
 
     except KeyError as e:
         logger.error("%s is not a valid JSON message. Missing : %s key.", message, e)
+        raise
     except ValueError as e:
         logger.error('%s is not a valid JSON message. Error value : %s', message, e)
+        raise
 
 
 def retrieve_image(image: dict):
@@ -86,21 +97,23 @@ def retrieve_image(image: dict):
 
     try:
         curl.urlretrieve(image['url'], image_path)
+        image['force_crop'] = True
 
     except (curl.URLError, curl.HTTPError):
         logger.error("%s cannot be retrieved.", image['url'])
+        raise
 
 
-def check_image_exist(image: dict):
+def check_file_exist(path):
     """
-    Function that check if the image exists
+    Function that check if a file exists
 
     :param image:
     :return: bool
     """
-    image_path = original_folder + "/" + image['name'] + "." + image['extension']
+    file_path =  path
 
-    if not os.path.exists(image_path):
+    if not os.path.exists(file_path):
         return False
     else:
         return True

@@ -12,9 +12,9 @@ async def run(loop):
     await sc.connect("serieall", "worker-images-sub", nats=nc)
 
     message = json.dumps({"url": "https://www.thetvdb.com/banners/fanart/original/5b0fcf2c5c1b5.jpg",
-                          "name": "supergirl", "crop_type": "poster", "crop": "middle"}).encode()
-    message2 = json.dumps({"url": "https://www.thetvdb.com/banners/graphical/295759-g2.jpg",
-                          "name": "supergirl_banner", "crop_type": "banner", "crop": "middle"}).encode()
+                          "name": "supergirl", "crop_type": "poster", "crop": "middle", "force_crop": False}).encode()
+    message2 = json.dumps({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg",
+                          "name": "supergirl_banner", "crop_type": "banner", "crop": "middle", "force_crop": False}).encode()
     await sc.publish("worker_images", message)
     await sc.publish("worker_images", message2)
 
