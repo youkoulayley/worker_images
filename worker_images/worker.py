@@ -23,7 +23,7 @@ def run(message):
     :param message:
     """
     image = decode_message(message)
-    image_exists = check_file_exist(original_folder + "/" + image["name"] + "." + image["extension"])
+    image_exists = check_file_exists(original_folder + "/" + image["name"] + "." + image["extension"])
 
     if not image_exists:
         logger.debug("The image %s does not exist on disk. Downloading it...", image['name'])
@@ -48,8 +48,8 @@ def run(message):
         if image['force_crop']:
             resize_and_crop(image, image_format)
         else:
-            check_crop_exists = check_file_exist(images_folder + '/' + image_format + "/" + image['name'] + "." +
-                                                 image['extension'])
+            check_crop_exists = check_file_exists(images_folder + '/' + image_format + "/" + image['name'] + "." +
+                                                  image['extension'])
             if not check_crop_exists:
                 resize_and_crop(image, image_format)
             else:
@@ -73,15 +73,12 @@ def decode_message(message) -> dict:
             'extension': str(message['url']).rsplit('.', 1)[1],
             'crop_type': str(message['crop_type']),
             'crop': str(message['crop']),
-            "force_crop": bool(message['force_crop'])
+            'force_crop': bool(message['force_crop'])
         }
         return image
 
     except KeyError as e:
         logger.error("%s is not a valid JSON message. Missing : %s key.", message, e)
-        raise
-    except ValueError as e:
-        logger.error('%s is not a valid JSON message. Error value : %s', message, e)
         raise
 
 
@@ -104,16 +101,15 @@ def retrieve_image(image: dict):
         raise
 
 
-def check_file_exist(path):
+def check_file_exists(path):
     """
     Function that check if a file exists
 
-    :param image:
+    :param path:
     :return: bool
     """
-    file_path =  path
 
-    if not os.path.exists(file_path):
+    if not os.path.exists(path):
         return False
     else:
         return True
