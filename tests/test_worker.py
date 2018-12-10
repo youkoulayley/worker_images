@@ -1,6 +1,11 @@
 import pytest
 import urllib.request as curl
-from worker_images import worker
+from worker_images import worker, config
+
+application_name = config.get_config("DEFAULT", "application_name")
+original_folder = config.get_config("DEFAULT", "original_folder")
+images_folder = config.get_config("DEFAULT", "images_folder")
+image_formats = config.get_config("DEFAULT", "image_formats")
 
 
 @pytest.mark.parametrize("message", [
@@ -33,14 +38,6 @@ def test_decode_message_fail(message, error_expected):
         worker.decode_message(message)
 
 
-@pytest.mark.parametrize("image", [
-    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg", "name": "supergirl", "extension": "jpg",
-      "crop_type": "poster", "crop": "middle", "force_crop": True})
-])
-def test_retrieve_image(image):
-    assert worker.retrieve_image(image)
-
-
 @pytest.mark.parametrize("image, error_expected", [
     ({"url": "https://www.thetvdb.com/banners/text/95759-2.jpg", "name": "supergirl", "extension": "jpg",
       "crop_type": "poster", "crop": "middle", "force_crop": True}, curl.HTTPError),
@@ -52,16 +49,24 @@ def test_retrieve_image_fail(image, error_expected):
         worker.retrieve_image(image)
 
 
+@pytest.mark.parametrize("image", [
+    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg", "name": "supergirl", "extension": "jpg",
+      "crop_type": "poster", "crop": "middle", "force_crop": True})
+])
+def test_retrieve_image(image):
+    assert worker.retrieve_image(image)
+
+
 @pytest.mark.parametrize("path, return_expected", [
-    ("images/original/supergirl.jpg", True),
-    ("images/original/toto.jpg", False)
+    (original_folder + "supergirl.jpg", True),
+    (original_folder + "/toto.jpg", False)
 ])
 def test_check_file_exists(path, return_expected):
     assert worker.check_file_exists(path) == return_expected
 
 
 @pytest.mark.parametrize("file, md5_expected", [
-    ("images/original/supergirl.jpg", "a385ae814a29320b9feb000dd42c10da"),
+    (original_folder + "/supergirl.jpg", "a385ae814a29320b9feb000dd42c10da"),
 ])
 def test_check_md5_local_file(file, md5_expected):
     assert worker.check_md5(open(file, 'rb')) == md5_expected
@@ -75,7 +80,7 @@ def test_check_md5_url(url, md5_expected):
 
 
 @pytest.mark.parametrize("image, image_format", [
-    ("images/original/supergirl.jpg", "100_50"),
+    (original_folder + "/supergirl.jpg", "100_50"),
 ])
 def test_resize_and_crop(image, image_format):
     assert worker.resize_and_crop(image, image_format)
