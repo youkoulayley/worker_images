@@ -10,7 +10,6 @@ pytest-cov = "*"
 [packages]
 asyncio-nats-streaming = "*"
 pillow = "*"
-pytest-cov = "*"
 
 [requires]
 python_version = "3.7"

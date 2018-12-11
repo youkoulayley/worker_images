@@ -41,8 +41,10 @@ def run(message):
                 logger.debug("The image %s is the same as the one on the disk", image['url'])
         except urllib.error.HTTPError:
             logger.error("The URL %s does not exists.", image['url'])
+            raise
         except urllib.error.URLError:
             logger.error("The URL %s is not valid", image['url'])
+            raise
 
     for image_format in json.loads(image_formats)[image['crop_type']]:
         if image['force_crop']:
@@ -54,6 +56,7 @@ def run(message):
                 resize_and_crop(image, image_format)
             else:
                 logger.debug("The image %s was not resized and crop (%s).", image['name'], image_format)
+    return True
 
 
 def decode_message(message) -> dict:
@@ -95,6 +98,7 @@ def retrieve_image(image: dict):
     try:
         curl.urlretrieve(image['url'], image_path)
         image['force_crop'] = True
+        return True
 
     except (curl.URLError, curl.HTTPError):
         logger.error("%s cannot be retrieved.", image['url'])
@@ -124,15 +128,11 @@ def check_md5(file):
     """
 
     md5 = hashlib.md5()
-    try:
-        while True:
-            data = file.read(2 ** 20)
-            if not data:
-                break
-            md5.update(data)
-    except IOError:
-        print('File \'' + file + '\' not found!')
-        return None
+    while True:
+        data = file.read(2 ** 20)
+        if not data:
+            break
+        md5.update(data)
 
     return md5.hexdigest()
 
@@ -178,7 +178,7 @@ def resize_and_crop(image, image_format):
             box = (0, img.size[1] - size[1], img.size[0], img.size[1])
         else:
             logger.error('%s is invalid value for crop_type', image['crop'])
-            return
+            return False
         img = img.crop(box)
     elif ratio < img_ratio:
         img = img.resize((math.floor(size[1] * img.size[0] / img.size[1]), size[1]),
@@ -192,11 +192,12 @@ def resize_and_crop(image, image_format):
             box = (img.size[0] - size[0], 0, img.size[0], img.size[1])
         else:
             logger.error('%s is invalid value for crop_type', image['crop'])
-            return
+            return False
         img = img.crop(box)
     else:
         img = img.resize((size[0], size[1]),
                          Image.ANTIALIAS)
-        # If the scale is the same, we do not need to crop
+    # If the scale is the same, we do not need to crop
     img.save(folder_format + '/' + image['name'] + '.jpg')
     logger.info('The image %s has been resize in %s', image['name'], image_format)
+    return True
