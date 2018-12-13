@@ -6,8 +6,8 @@ import urllib.request as curl
 from worker_images import worker, config
 
 application_name = config.get_config("DEFAULT", "application_name")
-original_folder = "../images/original"
-images_folder = "../images"
+original_folder = config.get_config("DEFAULT", "original_folder")
+images_folder = config.get_config("DEFAULT", "images_folder")
 image_formats = config.get_config("DEFAULT", "image_formats")
 
 if not os.path.exists(original_folder):
