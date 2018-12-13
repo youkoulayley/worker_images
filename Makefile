@@ -1,5 +1,5 @@
 init:
 	pipenv install
 
-test:
-	py.test --cov=worker_images tests/
+unittests:
+	py.test tests/ -v --cov worker_images --cov-report term-missing

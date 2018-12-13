@@ -1,4 +1,4 @@
-# Worker Images
+# worker_images
 [![Build Status](https://travis-ci.org/Youkoulayley/worker_images.svg?branch=master)](https://travis-ci.org/Youkoulayley/worker_images)
 [![Coverage Status](https://coveralls.io/repos/github/Youkoulayley/worker_images/badge.svg?branch=master)](https://coveralls.io/github/Youkoulayley/worker_images?branch=master)
 
