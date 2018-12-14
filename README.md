@@ -81,7 +81,20 @@ The NATS section contains the configuration to connect to NATS
 |channel|Channel where the NATS messages are send|string|
 
 ## Development
+Before starting to contribute to this project, you need to setup a NATS Streaming Server. A docker-compose file is present at the root of the repo for this purpose.
+Just launch it : 
+```bash
+docker-compose up -d
+``` 
 
+Yo can test sending a message to NATS with the bin/nats_pub.py script.
+
+## Tests
+The project has unit tests and you need to pass all of them before your PR is validated.
+Just run :
+```bash 
+make unittests
+```
 
 ## Contributing
 
