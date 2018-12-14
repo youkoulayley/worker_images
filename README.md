@@ -79,3 +79,12 @@ The NATS section contains the configuration to connect to NATS
 |----|-----------|----|
 |cluster_id|The cluster of the NATS server|string|
 |channel|Channel where the NATS messages are send|string|
+
+## Development
+
+
+## Contributing
+
+Thanks for thinking about contributing to worker_images! The success of an open source project is entirely down to the efforts of its contributors, so thank you for even thinking of contributing.
+
+Before you do so, you should check out our contributing guidelines in the [CONTRIBUTING.md](CONTRIBUTING.md) file, to make sure it's as easy as possible for us to accept your contribution.
