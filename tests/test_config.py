@@ -3,7 +3,7 @@ from worker_images import config
 
 
 @pytest.mark.parametrize("file, error_expected", [
-    ('toto.ini', FileNotFoundError)
+    ('tests/config/toto.ini', FileNotFoundError)
 ])
 def test_load_config_fail(file, error_expected):
     """
@@ -17,7 +17,8 @@ def test_load_config_fail(file, error_expected):
 
 
 @pytest.mark.parametrize("file", [
-    'config.ini'
+    'tests/config/config_tests.ini',
+    'tests/config/config_tests_tls.ini'
 ])
 def test_load_config(file):
     """
