@@ -2,18 +2,17 @@ import configparser
 import os
 
 
-def get_config(section, key):
+def load_config(file):
     """
-    Get a key in a section of the config file.
+    Load configuration file
 
-    :param section:
-    :param key:
+    :param file:
     :return:
     """
-
     config = configparser.ConfigParser()
-    config.read(os.path.dirname(os.path.abspath(__file__)) + '/../config.ini')
+    if os.path.isfile(file):
+        config.read(file)
+    else:
+        raise FileNotFoundError
 
-    value = config.get(section, key)
-
-    return value
+    return config

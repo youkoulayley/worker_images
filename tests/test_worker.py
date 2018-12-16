@@ -1,140 +1,51 @@
 import pytest
 import os
-import errno
 import urllib.error
-import urllib.request as curl
 from worker_images import worker, config
 
-application_name = config.get_config("DEFAULT", "application_name")
-original_folder = config.get_config("DEFAULT", "original_folder")
-images_folder = config.get_config("DEFAULT", "images_folder")
-image_formats = config.get_config("DEFAULT", "image_formats")
 
-if not os.path.exists(original_folder):
-    try:
-        os.makedirs(original_folder)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
+def load_app():
+    """
+    Load application (configuration + object worker_images)
+
+    :return:
+    """
+    conf = config.load_config("config_tests.ini")
+    worker_image = worker.WorkerImage(conf)
+
+    # Setup directory
+    if not os.path.exists(conf.get('DEFAULT', 'original_folder')):
+        os.makedirs(conf.get('DEFAULT', 'original_folder'))
+
+    return worker_image
 
 
 @pytest.mark.parametrize("message", [
-    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg", "name": "supergirl_banner", "crop_type": "banner",
-      "crop": "middle", "force_crop": False}),
-    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg", "name": "supergirl", "crop_type": "poster",
-      "crop": "top", "force_crop": True})
+    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg",
+      "name": "supergirl_banner", "crop_type": "banner", "crop": "middle", "force_crop": False}),
+    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg",
+      "name": "supergirl_banner", "crop_type": "banner", "crop": "middle", "force_crop": True}),
+    ({"url": "https://www.thetvdb.com/banners/graphical/295759-g9.jpg",
+      "name": "supergirl_banner", "crop_type": "banner", "crop": "middle", "force_crop": True}),
+    ({"url": "https://www.thetvdb.com/banners/posters/5bd458bda1772.jpg",
+      "name": "supergirl", "crop_type": "poster", "crop": "middle", "force_crop": False}),
+    ({"url": "https://www.thetvdb.com/banners/posters/5bd458bda1772.jpg",
+      "name": "supergirl", "crop_type": "poster", "crop": "middle", "force_crop": False}),
+    ({"url": "https://www.thetvdb.com/banners/posters/5bd458bda1772.jpg",
+      "name": "supergirl", "crop_type": "poster", "crop": "top", "force_crop": True}),
+    ({"url": "https://www.thetvdb.com/banners/posters/5bd458bda1772.jpg",
+      "name": "supergirl", "crop_type": "poster", "crop": "bottom", "force_crop": True}),
+    ({"url": "https://www.thetvdb.com/banners/posters/5bd458bda1772.jpg",
+      "name": "supergirl", "crop_type": "poster2", "crop": "bottom", "force_crop": False})
 ])
-def test_decode_message(message):
+def test_run(message):
     """
-    Test to decode message
+    Tests run function
 
     :param message:
     """
-    assert worker.decode_message(message)
-
-
-@pytest.mark.parametrize("message, error_expected", [
-    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg", "name": "supergirl", "crop_type": "poster",
-      "crop": "top", "force_rop": True}, KeyError)
-])
-def test_decode_message_fail(message, error_expected):
-    """
-    Test unavailable message
-
-    :param message:
-    :param error_expected:
-    """
-    with pytest.raises(error_expected):
-        worker.decode_message(message)
-
-
-@pytest.mark.parametrize("image, error_expected", [
-    ({"url": "https://www.thetvdb.com/banners/text/95759-2.jpg", "name": "supergirl", "extension": "jpg",
-      "crop_type": "poster", "crop": "middle", "force_crop": True}, curl.HTTPError),
-    ({"url": "toto://www.thetvdb.com/banners/text/295759-2.jpg", "name": "supergirl", "extension": "jpg",
-      "crop_type": "poster", "crop": "middle", "force_crop": True}, curl.URLError)
-])
-def test_retrieve_image_fail(image, error_expected):
-    with pytest.raises(error_expected):
-        worker.retrieve_image(image)
-
-
-@pytest.mark.parametrize("image", [
-    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg", "name": "supergirl", "extension": "jpg",
-      "crop_type": "poster", "crop": "middle", "force_crop": True})
-])
-def test_retrieve_image(image):
-    assert worker.retrieve_image(image)
-
-
-@pytest.mark.parametrize("path, return_expected", [
-    (original_folder + "/supergirl.jpg", True),
-    (original_folder + "/toto.jpg", False)
-])
-def test_check_file_exists(path, return_expected):
-    assert worker.check_file_exists(path) == return_expected
-
-
-@pytest.mark.parametrize("file, md5_expected", [
-    (original_folder + "/supergirl.jpg", "f278c2bece6f8b0cff0754cab0ddda2b"),
-])
-def test_check_md5_local_file(file, md5_expected):
-    assert worker.check_md5(open(file, 'rb')) == md5_expected
-
-
-@pytest.mark.parametrize("file, error_expected", [
-    (original_folder + "/toto.jpg", Exception),
-])
-def test_check_md5_local_file_fail(file, error_expected):
-    with pytest.raises(error_expected):
-        worker.check_md5(open(file, 'rb'))
-
-
-@pytest.mark.parametrize("url, md5_expected", [
-    ("https://www.thetvdb.com/banners/text/295759-2.jpg", "f278c2bece6f8b0cff0754cab0ddda2b"),
-])
-def test_check_md5_url(url, md5_expected):
-    assert worker.check_md5(curl.urlopen(url)) == md5_expected
-
-
-@pytest.mark.parametrize("image, image_format, return_expected", [
-    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg", "name": "supergirl", "extension": "jpg",
-      "crop_type": "poster", "crop": "top", "force_crop": True}, "300_10", True),
-    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg", "name": "supergirl", "extension": "jpg",
-      "crop_type": "poster", "crop": "middle", "force_crop": True}, "300_10", True),
-    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg", "name": "supergirl", "extension": "jpg",
-      "crop_type": "poster", "crop": "bottom", "force_crop": True}, "300_10", True),
-    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg", "name": "supergirl", "extension": "jpg",
-      "crop_type": "poster", "crop": "toto", "force_crop": True}, "300_10", False),
-    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg", "name": "supergirl", "extension": "jpg",
-      "crop_type": "poster", "crop": "top", "force_crop": True}, "85_200", True),
-    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg", "name": "supergirl", "extension": "jpg",
-      "crop_type": "poster", "crop": "middle", "force_crop": True}, "85_200", True),
-    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg", "name": "supergirl", "extension": "jpg",
-      "crop_type": "poster", "crop": "bottom", "force_crop": True}, "120_120", True),
-    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg", "name": "supergirl", "extension": "jpg",
-      "crop_type": "poster", "crop": "toto", "force_crop": True}, "120_120", False),
-    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg", "name": "supergirl", "extension": "jpg",
-      "crop_type": "poster", "crop": "toto", "force_crop": True}, "758_140", True),
-])
-def test_resize_and_crop(image, image_format, return_expected):
-    assert worker.resize_and_crop(image, image_format) == return_expected
-
-
-@pytest.mark.parametrize("message, return_expected", [
-    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg",
-      "name": "supergirl_banner2", "crop_type": "banner", "crop": "middle", "force_crop": False}, True),
-    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg",
-      "name": "supergirl_banner2", "crop_type": "banner", "crop": "middle", "force_crop": True}, True),
-    ({"url": "https://www.thetvdb.com/banners/graphical/295759-g9.jpg",
-      "name": "supergirl_banner2", "crop_type": "banner", "crop": "middle", "force_crop": True}, True),
-    ({"url": "https://www.thetvdb.com/banners/graphical/295759-g9.jpg",
-      "name": "supergirl_banner2", "crop_type": "poster", "crop": "middle", "force_crop": False}, True),
-    ({"url": "https://www.thetvdb.com/banners/graphical/295759-g9.jpg",
-      "name": "supergirl_banner2", "crop_type": "poster", "crop": "middle", "force_crop": False}, True)
-])
-def test_run(message, return_expected):
-    assert worker.run(message) == return_expected
+    worker_image = load_app()
+    assert worker_image.run(message)
 
 
 @pytest.mark.parametrize("message,error_expected", [
@@ -143,8 +54,31 @@ def test_run(message, return_expected):
      urllib.error.HTTPError),
     ({"url": "toto://www.thetvdb.com/banners/text/295759-2.jpg",
       "name": "supergirl_banner2", "crop_type": "banner", "crop": "middle", "force_crop": False},
-     urllib.error.URLError)
+     urllib.error.URLError),
+    ({"url": "https://www.thetvdb.com/banners/text/29559-2.jpg",
+      "name": "supergirl_banner", "crop_type": "banner", "crop": "middle", "force_crop": False},
+     urllib.error.HTTPError),
+    ({"url": "toto://www.thetvdb.com/banners/text/295759-2.jpg",
+      "name": "supergirl_banner", "crop_type": "banner", "crop": "middle", "force_crop": False},
+     urllib.error.URLError),
+    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg",
+      "nae": "supergirl_banner2", "crop_type": "banner", "crop": "middle", "force_crop": False},
+     KeyError),
+    ({"url": "https://www.thetvdb.com/banners/posters/5bd458bda1772.jpg",
+      "name": "supergirl", "crop_type": "poster", "crop": "toto", "force_crop": True},
+     ValueError),
+    ({"url": "https://www.thetvdb.com/banners/text/295759-2.jpg",
+      "name": "supergirl_banner2", "crop_type": "banner", "crop": "toto", "force_crop": True},
+     ValueError),
 ])
 def test_run_fail(message, error_expected):
+    """
+    Tests when the run function failed
+
+    :param message:
+    :param error_expected:
+    """
+    worker_image = load_app()
+
     with pytest.raises(error_expected):
-        worker.run(message)
+        worker_image.run(message)
