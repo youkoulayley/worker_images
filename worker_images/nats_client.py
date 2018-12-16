@@ -1,6 +1,7 @@
 import logging
 import json
 import os
+import ssl
 from nats.aio.client import Client as NATS
 from stan.aio.client import Client as STAN
 from worker_images import worker
@@ -16,6 +17,9 @@ async def run(loop, conf):
     :param conf:
     :param loop:
     """
+    servers = json.loads(conf.get('NATS', 'servers'))
+    logger.info(servers)
+    nats_tls = conf.getboolean('NATS', 'tls')
     cluster_id = conf.get('NATS', 'cluster_id')
     connection_name = conf.get('NATS', 'connection_name')
     channel = conf.get('NATS', 'channel')
@@ -24,9 +28,27 @@ async def run(loop, conf):
     nc = NATS()
     sc = STAN()
 
-    # Start session with NATS Streaming cluster using the established NATS connection.
-    await nc.connect(io_loop=loop)
+    if nats_tls:
+        # Load SSL configuration
+        ca_cert = conf.get('NATS', 'ca_cert')
+        client_cert = conf.get('NATS', 'client_cert')
+        client_key = conf.get('NATS', 'client_key')
 
+        # Prepare tls context
+        tls_ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
+        tls_ctx.load_verify_locations(ca_cert)
+        tls_ctx.load_cert_chain(certfile=client_cert,
+                                keyfile=client_key)
+
+        # Connect to NATS server with TLS
+        await nc.connect(servers=servers, io_loop=loop, tls=tls_ctx)
+        logger.info("Connected to NATS server with TLS.")
+    else:
+        # Connect to NATS server without TLS
+        await nc.connect(servers=servers, io_loop=loop)
+        logger.info("Connected to NATS server without TLS.")
+
+    # Connect to NATS streaming server with NATS connection configured above
     await sc.connect(cluster_id=cluster_id, client_id=connection_name + "_" + client_id, nats=nc)
     logger.info("Connected to NATS streaming server")
 
