@@ -27,7 +27,7 @@ async def run(loop, conf):
 
     nc = NATS()
     sc = STAN()
-
+    
     if nats_tls:
         # Load SSL configuration
         ca_cert = conf.get('NATS', 'ca_cert')
