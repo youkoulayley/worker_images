@@ -5,3 +5,7 @@ services:
     ports:
      - "4222:4222"
     command: ["-cid", "serieall"]
+  worker_images:
+    build: .
+    depends_on:
+      - nats-streaming

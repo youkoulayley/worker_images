@@ -32,6 +32,19 @@ The message contains different section :
 * **Crop**: The alignment of the crop ;
 * **Force_crop**: If true, force the resize & crop, even if the fil exists.
 
+## Arguments
+You can pass a config file in parameter to launch the application :
+```
+usage: worker_images [-h] -c CONFIG_FILE
+
+Worker images resize & crop image.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -c CONFIG_FILE, --config-file CONFIG_FILE
+                        Provide config file for the application
+```
+
 ## config.ini
 Example : 
 
@@ -53,6 +66,11 @@ image_formats = {
 level = debug
 
 [NATS]
+servers = ["nats://127.0.0.1:4222"]
+tls = no
+ca_cert = /etc/ssl/nats/ca.pem
+client_cert = /etc/ssl/nats/client_cert.pem
+client_key = /etc/ssl/nats/client_cert.key
 cluster_id = serieall
 connection_name = worker_images
 channel = worker_images
@@ -76,6 +94,11 @@ The NATS section contains the configuration to connect to NATS
 
 |Name|Description|Type|
 |----|-----------|----|
+|servers|List of NATS server to connect to|list|
+|tls|Is the connection to NATS server needs TLS ?|yes/no|
+|ca_cert|The CA cert to connect to NATS server|string|
+|client_cert|The client cert to connect to NATS server|string|
+|client_key|The client key to connect to NATS server|string|
 |cluster_id|The cluster of the NATS server|string|
 |connection_name|The name of the application, used for the connection to NATS|string|
 |channel|Channel where the NATS messages are send|string|
