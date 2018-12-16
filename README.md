@@ -37,7 +37,6 @@ Example :
 
 ```
 [DEFAULT]
-application_name = worker_images
 images_folder = ../images
 original_folder = %(images_folder)s/original
 image_formats = {
@@ -55,6 +54,7 @@ level = debug
 
 [NATS]
 cluster_id = serieall
+connection_name = worker_images
 channel = worker_images
 ```
 
@@ -62,7 +62,6 @@ The Default section contains the configuration for the application.
 
 |Name|Description|Type|
 |----|-----------|----|
-|application_name|The name of the application, used for the logger or the connection to NATS|string|
 |images_folder|Path of images folder|path|
 |original_folder|Path of originals images|path|
 |image_formats|A list of format to crop divided by type. Each type can have a different set of formats. You have to precise the type in the message sent to NATS|list|
@@ -78,6 +77,7 @@ The NATS section contains the configuration to connect to NATS
 |Name|Description|Type|
 |----|-----------|----|
 |cluster_id|The cluster of the NATS server|string|
+|connection_name|The name of the application, used for the connection to NATS|string|
 |channel|Channel where the NATS messages are send|string|
 
 ## Development
