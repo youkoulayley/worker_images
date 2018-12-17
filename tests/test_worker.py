@@ -10,7 +10,7 @@ def load_app():
 
     :return:
     """
-    conf = config.load_config("config_tests.ini")
+    conf = config.load_config("tests/config/config_tests.ini")
     worker_image = worker.WorkerImage(conf)
 
     # Setup directory

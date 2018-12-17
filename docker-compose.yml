@@ -5,6 +5,17 @@ services:
     ports:
      - "4222:4222"
     command: ["-cid", "serieall"]
+  nats-streaming-tls:
+    image: nats-streaming
+    ports:
+      - "4222:4222"
+    command: [
+      "-cid", "serieall",
+      "-secure", "true",
+      "-tls_client_cacert", "/etc/ssl/nats/ca.pem",
+      "-tls_client_cert", "/etc/ssl/nats/client.pem",
+      "-tls_client_key", "/etc/ssl/nats/client.key"
+    ]
   worker_images:
     build: .
     depends_on:

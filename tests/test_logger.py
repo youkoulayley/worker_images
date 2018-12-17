@@ -8,7 +8,7 @@ def load_conf():
 
     :return:
     """
-    conf = config.load_config("config_tests.ini")
+    conf = config.load_config("tests/config/config_tests.ini")
     return conf
 
 

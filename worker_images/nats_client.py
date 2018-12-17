@@ -18,7 +18,6 @@ async def run(loop, conf):
     :param loop:
     """
     servers = json.loads(conf.get('NATS', 'servers'))
-    logger.info(servers)
     nats_tls = conf.getboolean('NATS', 'tls')
     cluster_id = conf.get('NATS', 'cluster_id')
     connection_name = conf.get('NATS', 'connection_name')

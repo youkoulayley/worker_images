@@ -1,0 +1,16 @@
+version: '3'
+services:
+  nats-streaming-tls:
+    image: nats-streaming:0.11.2-linux
+    ports:
+      - "4223:4222"
+    command: [
+      "-cid", "serieall",
+      "--tls=true",
+      "-tlscacert", "/etc/ssl/nats/ca.pem",
+      "-tlscert", "/etc/ssl/nats/client.pem",
+      "-tlskey", "/etc/ssl/nats/client-key.pem",
+      "-tlsverify=false"
+    ]
+    volumes:
+      - ../certs:/etc/ssl/nats

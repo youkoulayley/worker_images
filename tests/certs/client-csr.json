@@ -1,0 +1,16 @@
+{
+  "CN": "worker_images",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "FR",
+      "L": "Bordeaux",
+      "O": "worker_images",
+      "OU": "CA",
+      "ST": "Gironde"
+    }
+  ]
+}
