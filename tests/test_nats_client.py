@@ -1,5 +1,5 @@
 import asyncio
-import time
+import pytest
 from worker_images import config, nats_client
 
 
@@ -13,25 +13,16 @@ def load_conf(config_file):
     return conf
 
 
-def test_nats_run():
+@pytest.mark.parametrize('config_file', [
+    'tests/config/config_tests.ini',
+    'tests/config/config_tests_tls.ini'
+])
+def test_nats_run(config_file):
     """
     Test connection to NATS without TLS
     """
-    conf = load_conf("tests/config/config_tests.ini")
+    conf = load_conf(config_file)
 
     # Start NATS loop
     loop = asyncio.get_event_loop()
     loop.run_until_complete(nats_client.run(loop, conf))
-    loop.close()
-
-
-def test_nats_run_tls():
-    """
-    Test connection to NATS with TLS
-    """
-    conf = load_conf("tests/config/config_tests_tls.ini")
-
-    # Start NATS loop
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(nats_client.run(loop, conf))
-    loop.close()
