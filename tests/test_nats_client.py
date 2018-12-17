@@ -22,7 +22,4 @@ def test_nats_run(config_file):
     Test connection to NATS without TLS
     """
     conf = load_conf(config_file)
-
-    # Start NATS loop
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(nats_client.run(loop, conf))
+    return conf
