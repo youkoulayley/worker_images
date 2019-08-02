@@ -95,7 +95,7 @@ class WorkerImage:
         :return:
         """
 
-        image_path = self.original_folder + "/" + image['name'] + "." + image['extension']
+        image_path = self.original_folder + "/" + image['name'] + "-" + image['crop_type'] + "." + image['extension']
 
         try:
             curl.urlretrieve(image['url'], image_path)
@@ -162,7 +162,7 @@ class WorkerImage:
         size[1] = int(size[1])
 
         # If height is higher we resize vertically, if not we resize horizontally
-        img = Image.open(self.original_folder + '/' + image['name'] + '.' + image['extension'])
+        img = Image.open(self.original_folder + '/' + image['name'] + "-" + image['crop_type'] + '.' + image['extension'])
         # Get current and desired ratio for the images
         img_ratio = img.size[0] / float(img.size[1])
         ratio = size[0] / float(size[1])
@@ -199,6 +199,6 @@ class WorkerImage:
             img = img.resize((size[0], size[1]),
                              Image.ANTIALIAS)
         # If the scale is the same, we do not need to crop
-        img.save(folder_format + '/' + image['name'] + '.jpg')
+        img.save(folder_format + '/' + image['name'] + "-" + image['crop_type'] + '.jpg')
         logger.info('The image %s has been resize in %s', image['name'], image_format)
         return True
