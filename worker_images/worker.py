@@ -5,6 +5,7 @@ import os
 import urllib.request as curl
 import urllib.error
 import math
+import traceback
 from PIL import Image
 
 logger = logging.getLogger('worker_images')
@@ -29,7 +30,10 @@ class WorkerImage:
 
         if not image_exists:
             logger.debug("The image %s does not exist on disk. Downloading it...", image['name'])
-            self.retrieve_image(image)
+            retrieve_status = self.retrieve_image(image)
+            if not retrieve_status:
+                logger.debug("The image %s does not exists at all.", image['name'])
+                return True
         else:
             image_path = self.original_folder + "/" + image['name'] + "." + image['extension']
             logger.debug("The image %s exists on disk. Checking the md5 of the file on disk and with URL...",
@@ -102,9 +106,11 @@ class WorkerImage:
             image['force_crop'] = True
             return True
 
-        except (curl.URLError, curl.HTTPError):
+        except (curl.HTTPError, curl.URLError, ValueError):
             logger.error("%s cannot be retrieved.", image['url'])
-            raise
+            return False
+        except:
+            traceback.print_exec()
 
     @staticmethod
     def check_file_exists(path):
