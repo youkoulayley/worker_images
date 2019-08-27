@@ -2,6 +2,7 @@ import hashlib
 import logging
 import json
 import os
+import sys
 import urllib.request as curl
 import urllib.error
 import math
@@ -26,7 +27,7 @@ class WorkerImage:
         """
 
         image = self.decode_message(message)
-        image_exists = self.check_file_exists(self.original_folder + "/" + image["name"] + "." + image["extension"])
+        image_exists = self.check_file_exists(self.original_folder + "/" + image["name"] + "-" + image["crop_type"] + "." + image["extension"])
 
         if not image_exists:
             logger.debug("The image %s does not exist on disk. Downloading it...", image['name'])
@@ -36,25 +37,12 @@ class WorkerImage:
                 return True
         else:
             image_path = self.original_folder + "/" + image['name'] + "." + image['extension']
-            logger.debug("The image %s exists on disk. Checking the md5 of the file on disk and with URL...",
+            logger.debug("The image %s exists on disk.",
                          image['name'])
-            md5_file_exists = self.check_md5(open(image_path, 'rb'))
-            try:
-                md5_file_url = self.check_md5(curl.urlopen(image['url']))
-                if md5_file_exists != md5_file_url:
-                    logger.info("The image %s is not the same as the one on the disk. Downloading it...", image['name'])
-                    self.retrieve_image(image)
-                else:
-                    logger.debug("The image %s is the same as the one on the disk", image['url'])
-            except urllib.error.HTTPError:
-                logger.error("The URL %s does not exists.", image['url'])
-                raise
-            except urllib.error.URLError:
-                logger.error("The URL %s is not valid", image['url'])
-                raise
 
         for image_format in json.loads(self.image_formats)[image['crop_type']]:
             if image['force_crop']:
+                logger.debug("Force_crop set to true, resizing...")
                 self.resize_and_crop(image, image_format)
             else:
                 check_crop_exists = self.check_file_exists(self.images_folder + '/' + image_format + "/" +
@@ -126,24 +114,6 @@ class WorkerImage:
         else:
             return True
 
-    @staticmethod
-    def check_md5(file):
-        """
-        Check MD5 sum of file.
-
-        :param file:
-        :return:
-        """
-
-        md5 = hashlib.md5()
-        while True:
-            data = file.read(2 ** 20)
-            if not data:
-                break
-            md5.update(data)
-
-        return md5.hexdigest()
-
     def resize_and_crop(self, image, image_format):
         """
         Resize and crop an image to fit the specified size.
@@ -172,6 +142,7 @@ class WorkerImage:
         # Get current and desired ratio for the images
         img_ratio = img.size[0] / float(img.size[1])
         ratio = size[0] / float(size[1])
+        logger.debug("img_ratio : %s, ratio: %s", img_ratio, ratio)
         # The image is scaled/cropped vertically or horizontally depending on the ratio
         if ratio > img_ratio:
             img = img.resize((size[0], math.floor(size[0] * img.size[1] / img.size[0])),
@@ -205,6 +176,11 @@ class WorkerImage:
             img = img.resize((size[0], size[1]),
                              Image.ANTIALIAS)
         # If the scale is the same, we do not need to crop
-        img.save(folder_format + '/' + image['name'] + "-" + image['crop_type'] + '.jpg')
-        logger.info('The image %s has been resize in %s', image['name'], image_format)
+        try:
+            rgb_img = img.convert('RGB')
+            rgb_img.save(folder_format + '/' + image['name'] + "-" + image['crop_type'] + '.jpg')
+            logger.debug('The image %s has been resize in %s', image['name'], image_format)
+        except:
+            e = sys.exc_info()
+            logger.error( "Error: %s", e )
         return True

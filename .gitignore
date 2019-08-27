@@ -4,6 +4,7 @@
 __pycache__/
 *$py.class
 .idea
+.vscode
 images
 images_tests
 
